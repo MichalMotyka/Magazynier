@@ -5,6 +5,7 @@ import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
 import javax.swing.JTable;
 import javax.swing.JButton;
+import javax.swing.JDialog;
 import javax.swing.LayoutStyle.ComponentPlacement;
 
 import net.proteanit.sql.DbUtils;
@@ -21,10 +22,11 @@ import java.sql.SQLException;
 
 public class MagazynyLista {
 
-	private JFrame frame;
+	public JFrame frame;
 	public static JTable table;
 	public static String TYP = "Magazyny";
 	public static String Nazwa;
+
 
 	/**
 	 * Launch the application.
@@ -52,11 +54,11 @@ public class MagazynyLista {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
+	public void initialize() {
 		TowarSQL TSQL = new TowarSQL();
 		frame = new JFrame();
 		frame.setBounds(100, 100, 806, 396);
-		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+		frame.setDefaultCloseOperation(JFrame.DISPOSE_ON_CLOSE);
 		JButton btnNewButton = new JButton("Dodaj");
 		btnNewButton.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
@@ -65,7 +67,12 @@ public class MagazynyLista {
 				StatusOperacji.setCzyMagazyn_EDIT(false);
 				StatusOperacji.setCzyMagazyn_VIEW(false);
 				Magazyn magaz = new Magazyn();
-				magaz.magazyny();	
+				magaz.magazyny();
+				this.setEnable(false);
+			}
+
+			private void setEnable(boolean b) {
+				// TODO Auto-generated method stub
 				
 			}
 		});
@@ -140,6 +147,7 @@ public class MagazynyLista {
 				int ROW = table.getSelectedRow();
 				TableModel model = table.getModel();
 				Nazwa = (String) model.getValueAt(ROW, 0);
+				TSQL.setNazwa(Nazwa);
 				
 			}
 		});
