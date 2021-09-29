@@ -10,6 +10,7 @@ public class SQLStatment {
 	private String fDn = "Magazynier";
 	private Connection con;
 	private PreparedStatement stmt ;
+	
 	public ResultSet getSQL(String SQL) {
 	try {	
 	con = DriverManager.getConnection("jdbc:sqlserver://"+ frn + ";databaseName="+ fDn, "sa", "Poczta12@");
