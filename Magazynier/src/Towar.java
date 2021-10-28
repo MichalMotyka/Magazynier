@@ -9,12 +9,17 @@ import javax.swing.LayoutStyle.ComponentPlacement;
 import java.awt.Choice;
 import javax.swing.JComboBox;
 import javax.swing.JTable;
+import java.awt.event.ActionListener;
+import java.sql.SQLException;
+import java.awt.event.ActionEvent;
 
 public class Towar {
 
 	private JFrame frame;
 	private JTextField textField;
 	private JTable table;
+	private StatusOperacji SO =new StatusOperacji();
+	private TowarSQL TSQL = new TowarSQL();
 	/**
 	 * @wbp.nonvisual location=1078,89
 	 */
@@ -58,13 +63,32 @@ public class Towar {
 		
 		table = new JTable();
 		
-		JButton btnNewButton_1 = new JButton("New button");
+		JButton btnNewButton_1 = new JButton("Dodaj");
+		btnNewButton_1.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				StatusOperacji.setCzyMagazyn_ADD(true);
+				StatusOperacji.setCzyMagazyn_EDIT(false);
+				StatusOperacji.setCzyMagazyn_VIEW(false);
+				try {
+					TowarFormatka TowarF = new TowarFormatka();
+					TowarF.towarF();
+				} catch (SQLException e1) {
+					// TODO Auto-generated catch block
+					e1.printStackTrace();
+				}
+				
+			}
+		});
 		JButton btnNewButton_2 = new JButton("New button");
 		
 		JButton btnNewButton_3 = new JButton("New button");
 		JButton btnNewButton_4 = new JButton("New button");
 		
 		Choice choice = new Choice();
+		String magaz[] = TSQL.getMagazyny().clone();
+		for(int i =TSQL.CountMAG()-1;i>=0;i--) {
+			choice.add(magaz[i]);
+		}
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
 			groupLayout.createParallelGroup(Alignment.LEADING)

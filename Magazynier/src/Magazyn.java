@@ -1,5 +1,5 @@
 import java.awt.EventQueue;
-
+import java.awt.Color;
 import javax.swing.JFrame;
 import javax.swing.GroupLayout;
 import javax.swing.GroupLayout.Alignment;
@@ -7,6 +7,7 @@ import javax.swing.JTabbedPane;
 import javax.swing.JPanel;
 import javax.swing.JTextField;
 import javax.swing.JLabel;
+import javax.swing.JOptionPane;
 import javax.swing.LayoutStyle.ComponentPlacement;
 import javax.swing.JCheckBox;
 import javax.swing.text.DateFormatter;
@@ -17,20 +18,26 @@ import net.proteanit.sql.DbUtils;
 import javax.swing.JButton;
 import javax.swing.JTable;
 import java.awt.event.ActionListener;
+import java.lang.reflect.Array;
+import java.sql.SQLException;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.util.Date;
 import java.awt.event.ActionEvent;
+import java.awt.BorderLayout;
+import javax.swing.JScrollPane;
 
 public class Magazyn {
 
 	private JFrame frame;
 	private JTextField textField;
 	private JTextField textField_1;
-	private JTable table;
 	private Date dataD;
-
+	private int IDMAG;
+	private Weryfikator wer = new Weryfikator();
+	Date data ;
+	private JTable table;
 	/**
 	 * Launch the application.
 	 */
@@ -65,9 +72,8 @@ public class Magazyn {
 	 */
 	private void initialize() throws ParseException {
 		frame = new JFrame();
-		frame.setBounds(100, 100, 459, 310);
+		frame.setBounds(100, 100, 459, 333);
 		frame.setDefaultCloseOperation(JFrame.DO_NOTHING_ON_CLOSE);
-		
 		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		GroupLayout groupLayout = new GroupLayout(frame.getContentPane());
 		groupLayout.setHorizontalGroup(
@@ -197,6 +203,7 @@ public class Magazyn {
 		if(SO.isCzyMagazyn_VIEW()) {
 			TowarSQL TSQL = new TowarSQL();
 			String[] Values = TSQL.GETVALUES_MAG(MagazynyLista.Nazwa).clone();
+			IDMAG = Integer.parseInt(Values[5]);
 			textField.setText(Values[0]);
 			textField_1.setText(Values[1]);
 			Date data = new SimpleDateFormat("yyyy-MM-dd").parse(Values[3]);
@@ -222,9 +229,10 @@ public class Magazyn {
 		if(SO.isCzyMagazyn_EDIT()) {
 			TowarSQL TSQL = new TowarSQL();
 			String[] Values = TSQL.GETVALUES_MAG(MagazynyLista.Nazwa).clone();
+			IDMAG = Integer.parseInt(Values[5]);
 			textField.setText(Values[0]);
 			textField_1.setText(Values[1]);
-			Date data = new SimpleDateFormat("yyyy-MM-dd").parse(Values[3]);
+			 data = new SimpleDateFormat("yyyy-MM-dd").parse(Values[3]);
 			dateChooser.setDate(data);
 			if(Values[4] != null) {
 			dataD = new SimpleDateFormat("yyyy-MM-dd").parse(Values[4]);
@@ -238,30 +246,66 @@ public class Magazyn {
 			btnNewButton.addActionListener(new ActionListener() {
 				public void actionPerformed(ActionEvent e) {
 					SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd"); 
-					dataD = dateChooser.getDate();
+					if(dateChooser_1.getDate() !=null && !chckbxNewCheckBox.isSelected()) {
+					if(dateChooser_1.getDate() != null) {
+						dataD = dateChooser_1.getDate();
+					if(wer.CompareTwoDate(data, dataD)) {
 					TowarSQL TSQL = new TowarSQL();
+					TSQL.ADD_MAG_HIS(Values[0]);
 					TSQL.UPDATEMAGAZYN(textField.getText(), textField_1.getText(), chckbxNewCheckBox.isSelected(), formatter.format(data),formatter.format(dataD),Values[0]);
 					StatusOperacji SO = new StatusOperacji();
 					SO.setCzyMagazyn_ADD(false);
 					SO.OdblokowanieObiektu(MagazynyLista.TYP, MagazynyLista.Nazwa);
 					MagazynyLista.table.setModel(DbUtils.resultSetToTableModel(TSQL.GETMAGAZYN()));
 					frame.dispose();
-				}
-			});
-		}
-		if(SO.isCzyMagazyn_ADD()) {
-			btnNewButton.addActionListener(new ActionListener() {
-				public void actionPerformed(ActionEvent e) {
-					SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd"); 
-					Date data = dateChooser.getDate();
+				}else {
+					JOptionPane.showMessageDialog(frame,"Data dezaktywacji jest wczeœniejsza ni¿ aktywacji");
+				}}else {
 					TowarSQL TSQL = new TowarSQL();
-					TSQL.ADDMAGAZYN(textField.getText(), textField_1.getText(), chckbxNewCheckBox.isSelected(), formatter.format(data));
+					TSQL.UPDATEMAGAZYND(textField.getText(), textField_1.getText(), chckbxNewCheckBox.isSelected(), formatter.format(dateChooser.getDate()),Values[0]);
 					StatusOperacji SO = new StatusOperacji();
 					SO.setCzyMagazyn_ADD(false);
 					SO.OdblokowanieObiektu(MagazynyLista.TYP, MagazynyLista.Nazwa);
 					MagazynyLista.table.setModel(DbUtils.resultSetToTableModel(TSQL.GETMAGAZYN()));
 					frame.dispose();
-				}
+					}}else {
+						JOptionPane.showMessageDialog(frame, "Proszê uzupe³niæ datê dezaktywacji!");
+					}}
+			});
+		}
+		if(SO.isCzyMagazyn_ADD()) {
+			btnNewButton.addActionListener(new ActionListener() {
+				public void actionPerformed(ActionEvent e) {
+					chckbxNewCheckBox.setEnabled(false);
+					try {
+						if(!wer.IsExist(textField.getText(),"Nazwa", "Magazyny")) {
+							if(!wer.checkValuesIsNULL(textField.getText()) && !wer.checkValuesIsNULL(textField_1.getText()) && !wer.checkValuesIsNULL(dateChooser.getDate().toString())) {
+						SimpleDateFormat formatter = new SimpleDateFormat("yyyy/MM/dd"); 
+						Date data = dateChooser.getDate();
+						TowarSQL TSQL = new TowarSQL();
+						TSQL.ADDMAGAZYN(textField.getText(), textField_1.getText(), chckbxNewCheckBox.isSelected(), formatter.format(data));
+						StatusOperacji SO = new StatusOperacji();
+						SO.setCzyMagazyn_ADD(false);
+						SO.OdblokowanieObiektu(MagazynyLista.TYP, MagazynyLista.Nazwa);
+						MagazynyLista.table.setModel(DbUtils.resultSetToTableModel(TSQL.GETMAGAZYN()));
+						frame.dispose();
+							}else {
+								if(wer.checkValuesIsNULL(textField.getText())) {
+									lblNewLabel.setForeground(Color.RED);
+								}if(wer.checkValuesIsNULL(textField_1.getText())) {
+									lblNewLabel_1.setForeground(Color.RED);
+								}if(wer.checkValuesIsNULL(dateChooser.getDateFormatString())) {
+									lblNewLabel_2.setForeground(Color.RED);
+								}
+								JOptionPane.showMessageDialog(frame, "Nie wszystkie wymagane pola zosta³a uzupe³nione!");
+							}
+							}else {
+							textField.setForeground(Color.RED);
+							JOptionPane.showMessageDialog(frame, "Magazyn o wybranej nazwie ju¿ istnieje");
+						}
+					} catch (SQLException e1) {
+						e1.printStackTrace();
+					}}
 			});
 		}
 		if(dateChooser.getDate() != null) {
@@ -269,14 +313,16 @@ public class Magazyn {
 		}else {
 			dateChooser.setEnabled(true);
 		}
-		if(dateChooser_1.getDate() == null) {
+		if(dateChooser_1.getDate() == null &&  SO.isCzyMagazyn_ADD() == false) {
 			chckbxNewCheckBox.setEnabled(true);
 		}else {
 			chckbxNewCheckBox.setEnabled(false);
 		}
 		chckbxNewCheckBox.addActionListener(new ActionListener() {
+			
 			public void actionPerformed(ActionEvent e) {
-				if(chckbxNewCheckBox.isSelected() && dateChooser_1.getDate() == null) {
+				if(chckbxNewCheckBox.isSelected() && dateChooser_1.getDate() == null || SO.isCzyMagazyn_ADD() == true ) {
+					
 					dateChooser_1.setEnabled(false);
 				}else {
 					dateChooser_1.setEnabled(true);
@@ -288,18 +334,25 @@ public class Magazyn {
 		JPanel panel_1 = new JPanel();
 		tabbedPane.addTab("Dane historyczne", null, panel_1, null);
 		
-		table = new JTable();
+		JScrollPane scrollPane = new JScrollPane();
 		GroupLayout gl_panel_1 = new GroupLayout(panel_1);
 		gl_panel_1.setHorizontalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
-				.addComponent(table, GroupLayout.DEFAULT_SIZE, 429, Short.MAX_VALUE)
+				.addGroup(gl_panel_1.createSequentialGroup()
+					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 437, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
 		gl_panel_1.setVerticalGroup(
 			gl_panel_1.createParallelGroup(Alignment.LEADING)
 				.addGroup(gl_panel_1.createSequentialGroup()
-					.addComponent(table, GroupLayout.DEFAULT_SIZE, 231, Short.MAX_VALUE)
-					.addContainerGap())
+					.addComponent(scrollPane, GroupLayout.PREFERRED_SIZE, 245, GroupLayout.PREFERRED_SIZE)
+					.addContainerGap(GroupLayout.DEFAULT_SIZE, Short.MAX_VALUE))
 		);
+		
+		table = new JTable();
+		scrollPane.setViewportView(table);
+		TowarSQL TSQL = new TowarSQL();
+		table.setModel(DbUtils.resultSetToTableModel(TSQL.GET_MAG_HIS(IDMAG)));
 		panel_1.setLayout(gl_panel_1);
 		frame.getContentPane().setLayout(groupLayout);
 		
