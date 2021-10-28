@@ -15,7 +15,7 @@ public class StatusOperacji {
 	
 	
 	
-	public boolean isCzyMagazyn_ADD() {
+	public static boolean isCzyMagazyn_ADD() {
 		return czyMagazyn_ADD;
 	}
 

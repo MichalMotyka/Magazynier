@@ -89,6 +89,12 @@ public class mainScreen {
 		mnNewMenu_1.add(mntmNewMenuItem_1);
 		
 		JMenuItem mntmNewMenuItem_2 = new JMenuItem("Magazyny");
+		mntmNewMenuItem_2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				MagazynyLista mgl = new MagazynyLista();
+				mgl.mgl();
+			}
+		});
 		mnNewMenu_1.add(mntmNewMenuItem_2);
 		
 		JMenu mnNewMenu_2 = new JMenu("New menu");
@@ -117,6 +123,18 @@ public class mainScreen {
 		
 		JMenuItem mntmNewMenuItem_7 = new JMenuItem("Szablony kont");
 		admins.add(mntmNewMenuItem_7);
+		
+		JMenu mnNewMenu_4 = new JMenu("Konfiguracja");
+		admins.add(mnNewMenu_4);
+		
+		JMenuItem mntmNewMenuItem_11 = new JMenuItem("Jednoski miary");
+		mntmNewMenuItem_11.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				JednoskiMiary JM = new JednoskiMiary();
+				JM.JM();
+			}
+		});
+		mnNewMenu_4.add(mntmNewMenuItem_11);
 		if(!upraw.isAdminSzablonKont()) {
 			mntmNewMenuItem_7.hide();
 		}
